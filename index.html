@@ -511,24 +511,41 @@
     if (rail._raf) cancelAnimationFrame(rail._raf);
     clearTimeout(rail._resume);
 
-    let paused = false;
     const speed = 0.8;
+    rail.style.scrollSnapType = 'none';
 
-    const enableAnim  = () => { rail.style.scrollSnapType = 'none'; rail._animating = true; };
-    const disableAnim = () => { rail.style.scrollSnapType = ''; rail._animating = false; };
-
-    enableAnim();
-
-    const tick = () => {
-      if (!paused) {
+    const runAnim = () => {
+      rail._animating = true;
+      const tick = () => {
         rail.scrollLeft += speed;
         if (rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - 1) {
           rail.scrollLeft = 0;
         }
-      }
+        rail._raf = requestAnimationFrame(tick);
+      };
       rail._raf = requestAnimationFrame(tick);
     };
-    rail._raf = requestAnimationFrame(tick);
+
+    const stopAnim = () => {
+      cancelAnimationFrame(rail._raf);
+      rail._raf = null;
+      rail._animating = false;
+    };
+
+    runAnim();
+
+    if (!rail._hoverBound) {
+      rail._hoverBound = true;
+      rail.addEventListener('mouseenter', () => {
+        rail._hovered = true;
+        clearTimeout(rail._resume);
+        stopAnim();
+      });
+      rail.addEventListener('mouseleave', () => {
+        rail._hovered = false;
+        if (!rail._touchPaused) runAnim();
+      });
+    }
 
     const attachTouch = () => {
       ['pointerdown','touchstart'].forEach(ev =>
@@ -537,30 +554,15 @@
     };
 
     const pauseTouch = () => {
-      paused = true;
-      disableAnim();
+      stopAnim();
+      rail._touchPaused = true;
       clearTimeout(rail._resume);
       rail._resume = setTimeout(() => {
-        if (!rail._hovered) { enableAnim(); paused = false; attachTouch(); }
+        rail._touchPaused = false;
+        if (!rail._hovered) runAnim();
+        attachTouch();
       }, 3000);
     };
-
-    // Mouse hover: pause immediately, resume on leave
-    if (!rail._hoverBound) {
-      rail._hoverBound = true;
-      rail.addEventListener('mouseenter', () => {
-        rail._hovered = true;
-        paused = true;
-        disableAnim();
-        clearTimeout(rail._resume);
-      });
-      rail.addEventListener('mouseleave', () => {
-        rail._hovered = false;
-        enableAnim();
-        paused = false;
-        attachTouch();
-      });
-    }
 
     attachTouch();
   }
