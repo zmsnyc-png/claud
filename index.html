@@ -36,7 +36,7 @@
       --bot-reserve: 50px;
       --copy-w: 100%;
       --copy-gap: 0px;
-      --img-h: calc(100dvh - var(--top-reserve) - 160px - var(--bot-reserve) - 40px);
+      --img-h: calc(100dvh - var(--top-reserve) - var(--bot-reserve) - 20px);
     }
     body.statement-open {
       --bot-reserve: 180px;
@@ -177,8 +177,9 @@
       right: var(--side-pad);
       bottom: auto;
       width: auto;
-      padding: 8px 0 0 0;
+      padding: 8px 0 20px 0;
       display: block;
+      background: linear-gradient(to bottom, var(--bg) 60%, transparent 100%);
     }
     .proj-copy .top + .proj-quote,
     .proj-copy > .proj-quote{
@@ -235,10 +236,10 @@
     .h-rail{
       left: 0;
       right: 0;
-      top: calc(var(--top-reserve) + 160px);
+      top: var(--top-reserve);
       bottom: var(--bot-reserve);
       height: auto;
-      padding: 20px var(--side-pad);
+      padding: 10px var(--side-pad);
       gap: 14px;
       transition: top .35s ease, bottom .35s ease;
     }
