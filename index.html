@@ -350,6 +350,47 @@
   /* Hide pinned stuff during print */
   @media print { .top-fade,.bottom-fade,.hint { display:none; } }
 
+  /* ======== Services section ======== */
+  .services-wrap{
+    position: absolute;
+    left: var(--side-pad); right: var(--side-pad);
+    top: var(--top-reserve); bottom: var(--bot-reserve);
+    display: flex;
+    flex-direction: column;
+    padding: 30px 0;
+  }
+  .services-heading{
+    font-size: 14px; line-height: 17px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    margin-bottom: 36px;
+  }
+  .services-cols{
+    display: flex;
+    gap: 80px;
+  }
+  .services-col{
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+  .services-col li{
+    font-size: 14px; line-height: 17px;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+  }
+  .services-col li::before{
+    content: "— ";
+    color: rgba(0,0,0,.3);
+    font-size: 12px;
+  }
+  @media (max-width: 639px){
+    .services-cols{ gap: 40px; }
+    .services-col li{ font-size: 13px; line-height: 16px; }
+  }
+
   .shot img {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
@@ -404,6 +445,35 @@
         <div class="shot w-tall"><img src="uploads/img5.png" alt=""><div class="caption"><span>Port of Rauma</span><span>Film</span></div></div>
         <div class="shot alt2 w-sq"><img src="uploads/img6.png" alt=""><div class="caption"><span>Atlas / Vol. 2</span><span>Offset 2c</span></div></div>
         <div class="rail-end"></div>
+      </div>
+    </section>
+
+    <!-- ============ SERVICES ============ -->
+    <section class="project" data-screen-label="Services" data-index="2">
+      <div class="services-wrap">
+        <div class="services-heading">Services</div>
+        <div class="services-cols">
+          <ul class="services-col">
+            <li>Products catalog</li>
+            <li>Brochure</li>
+            <li>Publications guidelines</li>
+            <li>Collection identity</li>
+            <li>Digital production</li>
+            <li>Art direction</li>
+            <li>Type design</li>
+            <li>Visual campaigns</li>
+            <li>Stationary</li>
+            <li>Packaging</li>
+            <li>Motion design</li>
+          </ul>
+          <ul class="services-col">
+            <li>Wireframing</li>
+            <li>(UI)(UX)</li>
+            <li>Web design</li>
+            <li>E-commerce</li>
+            <li>Front &amp; Back End</li>
+          </ul>
+        </div>
       </div>
     </section>
 
