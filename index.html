@@ -506,10 +506,39 @@
 
   let activeIndex = 0;
 
+  function startSlideshow(rail) {
+    if (!rail) return;
+    if (rail._timer) clearInterval(rail._timer);
+
+    const shots = [...rail.querySelectorAll('.shot')];
+    if (shots.length < 2) return;
+    let idx = 0;
+
+    rail._timer = setInterval(() => {
+      idx = (idx + 1) % shots.length;
+      rail.scrollTo({ left: idx === 0 ? 0 : shots[idx].offsetLeft, behavior: 'smooth' });
+    }, 3000);
+
+    const pause = () => {
+      clearInterval(rail._timer);
+      clearTimeout(rail._resume);
+      rail._resume = setTimeout(() => startSlideshow(rail), 3000);
+    };
+    ['pointerdown','touchstart','wheel'].forEach(ev =>
+      rail.addEventListener(ev, pause, { passive: true, once: true })
+    );
+  }
+
   function setActive(i){
     if (i === activeIndex) return;
+    const oldRail = projects[activeIndex]?.querySelector('[data-rail]');
+    if (oldRail) { clearInterval(oldRail._timer); clearTimeout(oldRail._resume); }
     activeIndex = i;
+    startSlideshow(projects[i]?.querySelector('[data-rail]'));
   }
+
+  // Auto-start on first project
+  setTimeout(() => startSlideshow(projects[0]?.querySelector('[data-rail]')), 800);
 
   // Observe which project is in view
   const io = new IntersectionObserver((entries) => {
