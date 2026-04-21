@@ -36,7 +36,7 @@
       --bot-reserve: 50px;
       --copy-w: 100%;
       --copy-gap: 0px;
-      --img-h: calc(100dvh - var(--top-reserve) - var(--bot-reserve) - 20px);
+      --img-h: calc(100dvh - var(--top-reserve) - 50px - var(--bot-reserve) - 20px);
     }
     body.statement-open {
       --bot-reserve: 180px;
@@ -236,7 +236,7 @@
     .h-rail{
       left: 0;
       right: 0;
-      top: var(--top-reserve);
+      top: calc(var(--top-reserve) + 50px);
       bottom: var(--bot-reserve);
       height: auto;
       padding: 10px var(--side-pad);
