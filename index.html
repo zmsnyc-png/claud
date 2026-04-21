@@ -506,50 +506,10 @@
 
   let activeIndex = 0;
 
-  function animateRail(rail) {
-    if (!rail) return;
-    if (rail._stopAnim) rail._stopAnim();
-
-    let running = true;
-    let paused  = false;
-    let resumeTimer;
-    const speed = 1.5; // px per frame (~90px/s at 60fps)
-
-    const tick = () => {
-      if (!running) return;
-      if (!paused) {
-        rail.scrollLeft += speed;
-        if (rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - 1) {
-          rail.scrollLeft = 0;
-        }
-      }
-      requestAnimationFrame(tick);
-    };
-
-    requestAnimationFrame(tick);
-    rail._stopAnim = () => { running = false; clearTimeout(resumeTimer); };
-
-    const pause = () => {
-      paused = true;
-      clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(() => { paused = false; }, 3000);
-    };
-
-    ['pointerdown','touchstart','wheel'].forEach(ev =>
-      rail.addEventListener(ev, pause, { passive: true })
-    );
-  }
-
   function setActive(i){
     if (i === activeIndex) return;
-    const oldRail = projects[activeIndex] && projects[activeIndex].querySelector('[data-rail]');
-    if (oldRail && oldRail._stopAnim) oldRail._stopAnim();
     activeIndex = i;
-    animateRail(projects[i] && projects[i].querySelector('[data-rail]'));
   }
-
-  // Start animation on first project after a short delay
-  setTimeout(() => animateRail(projects[0] && projects[0].querySelector('[data-rail]')), 600);
 
   // Observe which project is in view
   const io = new IntersectionObserver((entries) => {
