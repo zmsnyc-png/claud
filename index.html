@@ -531,7 +531,7 @@
     rail._raf = requestAnimationFrame(tick);
 
     const attach = () => {
-      ['pointerdown','touchstart','wheel'].forEach(ev =>
+      ['pointerdown','touchstart'].forEach(ev =>
         rail.addEventListener(ev, pause, { passive: true, once: true })
       );
     };
