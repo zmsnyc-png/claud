@@ -33,10 +33,13 @@
     :root{
       --side-pad: 20px;
       --top-reserve: 64px;
-      --bot-reserve: 180px;  /* more room for multi-line bio */
+      --bot-reserve: 50px;
       --copy-w: 100%;
       --copy-gap: 0px;
-      --img-h: 44vh;
+      --img-h: calc(100dvh - var(--top-reserve) - 160px - var(--bot-reserve) - 40px);
+    }
+    body.statement-open {
+      --bot-reserve: 180px;
     }
   }
 
@@ -231,14 +234,17 @@
 
   @media (max-width: 639px){
     .h-rail{
-      /* Full width, anchored below the copy column */
       left: 0;
       right: 0;
-      top: auto;
+      top: calc(var(--top-reserve) + 160px);
       bottom: var(--bot-reserve);
-      height: calc(var(--img-h) + 40px);
+      height: auto;
       padding: 20px var(--side-pad);
       gap: 14px;
+      transition: top .35s ease, bottom .35s ease;
+    }
+    .shot{
+      transition: height .35s ease;
     }
   }
 
@@ -548,13 +554,15 @@
   const statement = document.querySelector('.statement');
   wordmark.addEventListener('click', () => {
     if (window.matchMedia('(max-width: 639px)').matches) {
-      statement.classList.toggle('visible');
+      const open = statement.classList.toggle('visible');
+      document.body.classList.toggle('statement-open', open);
     }
   });
   // Tap anywhere else to dismiss
   document.addEventListener('click', (e) => {
     if (window.matchMedia('(max-width: 639px)').matches && !wordmark.contains(e.target)) {
       statement.classList.remove('visible');
+      document.body.classList.remove('statement-open');
     }
   });
 })();
