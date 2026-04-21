@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FOW</title>
+<style>
+  :root{
+    --bg:#F9F9F9;
+    --ink:#000000;
+    --side-pad: 45px;
+    --top-reserve: 110px;   /* space for pinned wordmark */
+    --bot-reserve: 150px;   /* space for pinned statement */
+    --copy-w: 260px;
+    --copy-gap: 40px;
+    --img-h: clamp(420px, 62vh, 620px);
+  }
+
+  /* Tablet */
+  @media (max-width: 1023px){
+    :root{
+      --side-pad: 28px;
+      --top-reserve: 90px;
+      --bot-reserve: 160px;
+      --copy-w: 210px;
+      --copy-gap: 28px;
+      --img-h: clamp(360px, 58vh, 520px);
+    }
+  }
+
+  /* Mobile */
+  @media (max-width: 639px){
+    :root{
+      --side-pad: 20px;
+      --top-reserve: 64px;
+      --bot-reserve: 180px;  /* more room for multi-line bio */
+      --copy-w: 100%;
+      --copy-gap: 0px;
+      --img-h: 44vh;
+    }
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    background:var(--bg);
+    color:var(--ink);
+    height: 100dvh;
+    overflow:hidden; /* window never scrolls */
+  }
+  body{
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+    letter-spacing: 0.005em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+  }
+
+  /* ======== Pinned chrome ======== */
+  .top-fade{
+    position: fixed; top: 0; left: 0; right: 0;
+    height: var(--top-reserve);
+    background: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 50%, rgba(249,249,249,0) 100%);
+    z-index: 40; pointer-events: none;
+  }
+  .wordmark{
+    position: fixed; top: 44px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    font-weight: 700;
+    font-size: 14px; line-height: 17px;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    pointer-events: none;
+  }
+  @media (max-width: 639px){
+    .wordmark{ top: 22px; }
+  }
+
+  .bottom-fade{
+    position: fixed; left:0; right:0; bottom:0;
+    height: var(--bot-reserve);
+    background: linear-gradient(to top, var(--bg) 0%, var(--bg) 55%, rgba(249,249,249,0) 100%);
+    z-index: 40; pointer-events: none;
+  }
+  .statement{
+    position: fixed;
+    left: var(--side-pad); right: var(--side-pad); bottom: 44px;
+    z-index: 50;
+    font-size: 14px; line-height: 17px;
+    color: var(--ink);
+    text-wrap: pretty;
+    pointer-events: none;
+  }
+  @media (max-width: 639px){
+    .statement{ bottom: 22px; font-size: 13px; line-height: 16px; }
+  }
+
+  /* Hint that appears on first project */
+  .hint{
+    position: fixed;
+    left: var(--side-pad); bottom: calc(var(--bot-reserve) + 6px);
+    z-index: 45;
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    font-size: 10px; letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,.45);
+    pointer-events: none;
+    transition: opacity .4s ease;
+  }
+  .hint.hide{ opacity: 0; }
+  @media (max-width: 639px){
+    .hint{ display: none; }
+  }
+
+  /* ======== Vertical project scroll (snap) ======== */
+  .v-scroll{
+    position: fixed; inset: 0;
+    overflow-y: auto; overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    z-index: 10;
+    scrollbar-width: none;
+  }
+  .v-scroll::-webkit-scrollbar{ display: none; }
+
+  .project{
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
+    padding: var(--top-reserve) 0 var(--bot-reserve) 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Left copy column sits over the horizontal rail */
+  .proj-copy{
+    position: absolute;
+    left: var(--side-pad);
+    top: var(--top-reserve);
+    bottom: var(--bot-reserve);
+    width: var(--copy-w);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 30px 0 30px 0;
+    pointer-events: none; /* let the rail receive drag; text is still selectable via its own layer */
+  }
+  @media (max-width: 639px){
+    .proj-copy{
+      /* Stack above the rail on mobile */
+      position: absolute;
+      top: var(--top-reserve);
+      left: var(--side-pad);
+      right: var(--side-pad);
+      bottom: auto;
+      width: auto;
+      padding: 8px 0 0 0;
+      display: block;
+    }
+    .proj-copy .top + .proj-quote,
+    .proj-copy > .proj-quote{
+      margin-top: 14px;
+      max-width: none;
+      /* clamp quote so it doesn't balloon */
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+  .proj-copy > *{ pointer-events: auto; }
+  .proj-title{
+    font-size: 14px; line-height: 17px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+  .proj-meta{
+    font-size: 14px; line-height: 17px;
+    letter-spacing: 0.01em;
+  }
+  .proj-quote{
+    max-width: var(--copy-w);
+    font-size: 14px; line-height: 17px;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  /* Horizontal image rail, inside each project */
+  .h-rail{
+    position: absolute;
+    /* rail starts to the right of the copy column so images never cross the text */
+    left: calc(var(--side-pad) + var(--copy-w) + var(--copy-gap));
+    right: 0;
+    top: var(--top-reserve);
+    bottom: var(--bot-reserve);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-snap-type: x proximity;
+    padding: 30px var(--side-pad) 30px 0;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    z-index: 10;
+    -webkit-overflow-scrolling: touch;
+  }
+  .h-rail::-webkit-scrollbar{ display: none; }
+
+  @media (max-width: 639px){
+    .h-rail{
+      /* Full width, anchored below the copy column */
+      left: 0;
+      right: 0;
+      top: auto;
+      bottom: var(--bot-reserve);
+      height: calc(var(--img-h) + 40px);
+      padding: 20px var(--side-pad);
+      gap: 14px;
+    }
+  }
+
+  /* Image tiles — fixed height, varying width */
+  .shot{
+    position: relative;
+    flex: 0 0 auto;
+    height: var(--img-h);
+    overflow: hidden;
+    background: #E9EAE0;
+    scroll-snap-align: start;
+  }
+  /* Width variations */
+  .w-tall   { width: calc(var(--img-h) * 0.68); }  /* portrait */
+  .w-std    { width: calc(var(--img-h) * 0.78); }  /* portrait-ish */
+  .w-sq     { width: calc(var(--img-h) * 1.00); }  /* square */
+  .w-wide   { width: calc(var(--img-h) * 1.35); }  /* landscape */
+  .w-pano   { width: calc(var(--img-h) * 1.75); }  /* panorama */
+  .w-narrow { width: calc(var(--img-h) * 0.55); }  /* very tall */
+
+  @media (max-width: 639px){
+    .w-pano   { width: calc(var(--img-h) * 1.40); }
+    .w-wide   { width: calc(var(--img-h) * 1.15); }
+  }
+
+  .shot .fill{
+    position:absolute;inset:0;
+    background-color:#E4E5DA;
+    background-image: repeating-linear-gradient(
+      135deg,
+      rgba(0,0,0,0.05) 0px,
+      rgba(0,0,0,0.05) 1px,
+      transparent 1px,
+      transparent 9px
+    );
+  }
+  .shot.alt .fill{
+    background-color:#D9DBCD;
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgba(0,0,0,0.06) 0px,
+      rgba(0,0,0,0.06) 1px,
+      transparent 1px,
+      transparent 12px
+    );
+  }
+  .shot.alt2 .fill{
+    background-color:#E8E4D6;
+    background-image: repeating-linear-gradient(
+      90deg,
+      rgba(0,0,0,0.05) 0px,
+      rgba(0,0,0,0.05) 1px,
+      transparent 1px,
+      transparent 14px
+    );
+  }
+
+  .shot .label{
+    position:absolute; left: 14px; top: 14px;
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,.55);
+    background: rgba(255,255,255,.55);
+    backdrop-filter: blur(2px);
+    padding: 4px 7px;
+    border: 1px solid rgba(0,0,0,.08);
+  }
+  .shot .crop{
+    position:absolute; inset: 30% 18% 30% 18%;
+    border: 1px dashed rgba(0,0,0,.22);
+  }
+  .shot .crop-note{
+    position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing:.12em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,.5);
+    text-align:center;
+    line-height:1.5;
+    white-space: nowrap;
+  }
+  .shot .caption{
+    position:absolute; left: 14px; bottom: 14px; right: 14px;
+    display:flex; justify-content: space-between;
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    font-size: 9px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,.55);
+    gap: 10px;
+  }
+
+  /* Trailing spacer at the end of each rail so last image isn't jammed to edge */
+  .rail-end{
+    flex: 0 0 auto;
+    width: var(--side-pad); height: 1px;
+  }
+
+  /* Hide pinned stuff during print */
+  @media print { .top-fade,.bottom-fade,.hint { display:none; } }
+
+  .shot img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Pinned chrome -->
+  <div class="top-fade" aria-hidden="true"></div>
+  <div class="wordmark" data-screen-label="Wordmark (pinned)">FOW</div>
+
+  <!-- Hint -->
+  <div class="hint" id="hint">Scroll ↓ projects · ↔ images</div>
+
+  <!-- Vertical snap scroller — the only thing that scrolls -->
+  <main class="v-scroll" id="vScroll">
+
+    <!-- ============ PROJECT 1 — ÉDITIONS ============ -->
+    <section class="project" data-screen-label="01 Éditions" data-index="0">
+      <div class="proj-copy">
+        <div>
+          <div class="proj-title">ÉDITIONS</div>
+          <div class="proj-meta">web identity, graphic design</div>
+        </div>
+        <div class="proj-quote">
+          Well, I was born in Central Asia. I've always been surrounded by a lot of multicultural people, my family itself. I have a lot of international friends. When we began the redesign we started from scratch. We wanted to build a universal symbol of protection — not tied to any one culture or religion, but one that still unites us. Throughout the research we came across Inanna.
+        </div>
+      </div>
+      <div class="h-rail" data-rail>
+        <div class="shot w-std"><img src="uploads/img1.png" alt=""><div class="caption"><span>Ed. 001 / Spread</span><span>Color</span></div></div>
+        <div class="shot alt w-wide"><img src="uploads/img2.png" alt=""><div class="caption"><span>Plate ii</span><span>Medium format</span></div></div>
+        <div class="shot w-tall"><img src="uploads/img3.png" alt=""><div class="caption"><span>Plate iii</span><span>Natural</span></div></div>
+        <div class="rail-end"></div>
+      </div>
+    </section>
+
+    <!-- ============ PROJECT 2 — NORTH ATLAS ============ -->
+    <section class="project" data-screen-label="02 North Atlas" data-index="1">
+      <div class="proj-copy">
+        <div>
+          <div class="proj-title">NORTH ATLAS</div>
+          <div class="proj-meta">brand identity, signage</div>
+        </div>
+        <div class="proj-quote">
+          North Atlas began as a quiet archive of maritime maps from the Baltic. The identity had to feel old and new at once — a system a harbor master would trust, and a visitor would bookmark. We set the wordmark in a drawn grotesk, gave it a single thin rule, and stopped there.
+        </div>
+      </div>
+      <div class="h-rail" data-rail>
+        <div class="shot alt w-wide"><img src="uploads/img4.png" alt=""><div class="caption"><span>Exterior</span><span>Plate i</span></div></div>
+        <div class="shot w-tall"><img src="uploads/img5.png" alt=""><div class="caption"><span>Port of Rauma</span><span>Film</span></div></div>
+        <div class="shot alt2 w-sq"><img src="uploads/img6.png" alt=""><div class="caption"><span>Atlas / Vol. 2</span><span>Offset 2c</span></div></div>
+        <div class="rail-end"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Pinned bottom -->
+  <div class="bottom-fade" aria-hidden="true"></div>
+  <p class="statement" data-screen-label="Statement (pinned)">
+    FOW is a design and identity practice founded on the belief that the clearest expression is the hardest to achieve. Working across brand identity, visual systems, and digital presence, the office partners with organizations that understand the difference between looking good and meaning something. No decoration for its own sake. No concept without consequence.
+  </p>
+
+<script>
+(() => {
+  const v = document.getElementById('vScroll');
+  const projects = [...document.querySelectorAll('.project')];
+  const hint = document.getElementById('hint');
+
+  let activeIndex = 0;
+  function setActive(i){
+    if (i === activeIndex) return;
+    activeIndex = i;
+  }
+
+  // Observe which project is in view
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && e.intersectionRatio > 0.55){
+        const idx = parseInt(e.target.dataset.index, 10) || 0;
+        setActive(idx);
+      }
+    });
+  }, { root: v, threshold: [0.55, 0.8] });
+  projects.forEach(p => io.observe(p));
+
+  // Hint fades after first interaction
+  let hinted = false;
+  function hideHint(){
+    if (hinted) return;
+    hinted = true;
+    hint.classList.add('hide');
+  }
+  v.addEventListener('scroll', hideHint, { once: true, passive: true });
+
+  // Convert vertical wheel to horizontal rail scroll, unless the user is at the
+  // rail's edge — in which case let vertical scroll take over (snap to next project).
+  const EDGE_EPS = 2;     // px tolerance at the ends of the rail
+  const LOCK_MS  = 220;   // brief lock after a snap
+  let lastVChange = 0;
+
+  v.addEventListener('scroll', () => { lastVChange = performance.now(); }, { passive: true });
+
+  // Only redirect wheel on non-touch pointer devices (desktop/laptop).
+  const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+
+  if (!isCoarse) {
+    window.addEventListener('wheel', (ev) => {
+      // Ignore pinch-zoom and keyboard-triggered events
+      if (ev.ctrlKey) return;
+
+      // Find the currently active project's rail
+      const proj = projects[activeIndex];
+      if (!proj) return;
+      const rail = proj.querySelector('[data-rail]');
+      if (!rail) return;
+
+      // Determine dominant axis
+      const absX = Math.abs(ev.deltaX);
+      const absY = Math.abs(ev.deltaY);
+      const verticallyDominant = absY > absX;
+
+      // If vertical wheel, we may want to redirect into horizontal scrolling
+      if (verticallyDominant) {
+        const goingDown = ev.deltaY > 0;
+        const atEnd   = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - EDGE_EPS;
+        const atStart = rail.scrollLeft <= EDGE_EPS;
+
+        // Brief lock window right after entering a new project
+        const justSnapped = performance.now() - lastVChange < LOCK_MS;
+
+        if (goingDown && !atEnd) {
+          ev.preventDefault();
+          rail.scrollBy({ left: ev.deltaY, behavior: 'auto' });
+          hideHint();
+        } else if (!goingDown && !atStart) {
+          ev.preventDefault();
+          rail.scrollBy({ left: ev.deltaY, behavior: 'auto' });
+          hideHint();
+        } else if (justSnapped) {
+          ev.preventDefault();
+        }
+      } else {
+        hideHint();
+      }
+    }, { passive: false });
+  }
+
+  // Keyboard support: arrows navigate projects; ←/→ inside a project scroll rail
+  window.addEventListener('keydown', (e) => {
+    const proj = projects[activeIndex];
+    const rail = proj && proj.querySelector('[data-rail]');
+    if (!rail) return;
+    if (e.key === 'ArrowRight') {
+      rail.scrollBy({ left: 320, behavior: 'smooth' });
+      hideHint();
+      e.preventDefault();
+    } else if (e.key === 'ArrowLeft') {
+      rail.scrollBy({ left: -320, behavior: 'smooth' });
+      hideHint();
+      e.preventDefault();
+    } else if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+      const next = projects[activeIndex + 1];
+      if (next) { next.scrollIntoViewIfNeeded ? next.scrollIntoViewIfNeeded() : v.scrollTo({ top: next.offsetTop, behavior: 'smooth' }); e.preventDefault(); }
+    } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      const prev = projects[activeIndex - 1];
+      if (prev) { v.scrollTo({ top: prev.offsetTop, behavior: 'smooth' }); e.preventDefault(); }
+    }
+  });
+
+  // Persist which project user was last on
+  const KEY = 'fow:project';
+  const saved = parseInt(localStorage.getItem(KEY) || '0', 10);
+  if (!isNaN(saved) && saved > 0 && projects[saved]) {
+    requestAnimationFrame(() => {
+      v.scrollTo({ top: projects[saved].offsetTop, behavior: 'auto' });
+    });
+  }
+  const savedRails = JSON.parse(localStorage.getItem('fow:rails') || '{}');
+  projects.forEach((p, i) => {
+    const rail = p.querySelector('[data-rail]');
+    if (rail && savedRails[i] != null) {
+      requestAnimationFrame(() => { rail.scrollLeft = savedRails[i]; });
+    }
+    rail && rail.addEventListener('scroll', () => {
+      savedRails[i] = rail.scrollLeft;
+      localStorage.setItem('fow:rails', JSON.stringify(savedRails));
+    }, { passive: true });
+  });
+
+  // Save active project
+  const persistActive = () => localStorage.setItem(KEY, String(activeIndex));
+  v.addEventListener('scroll', () => {
+    // debounce lightly
+    clearTimeout(v._t);
+    v._t = setTimeout(persistActive, 200);
+  }, { passive: true });
+})();
+</script>
+</body>
+</html>
