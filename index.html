@@ -507,27 +507,36 @@
   let activeIndex = 0;
 
   function animateRail(rail) {
-    if (!rail || rail._interacted) return;
+    if (!rail) return;
     if (rail._stopAnim) rail._stopAnim();
 
     let running = true;
+    let paused  = false;
+    let resumeTimer;
     const speed = 1.5; // px per frame (~90px/s at 60fps)
 
     const tick = () => {
       if (!running) return;
-      rail.scrollLeft += speed;
-      if (rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - 1) {
-        rail.scrollLeft = 0;
+      if (!paused) {
+        rail.scrollLeft += speed;
+        if (rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - 1) {
+          rail.scrollLeft = 0;
+        }
       }
       requestAnimationFrame(tick);
     };
 
     requestAnimationFrame(tick);
-    rail._stopAnim = () => { running = false; };
+    rail._stopAnim = () => { running = false; clearTimeout(resumeTimer); };
 
-    const stop = () => { rail._stopAnim(); rail._interacted = true; };
+    const pause = () => {
+      paused = true;
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => { paused = false; }, 3000);
+    };
+
     ['pointerdown','touchstart','wheel'].forEach(ev =>
-      rail.addEventListener(ev, stop, { once: true, passive: true })
+      rail.addEventListener(ev, pause, { passive: true })
     );
   }
 
