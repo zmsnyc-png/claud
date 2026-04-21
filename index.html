@@ -75,7 +75,12 @@
     pointer-events: none;
   }
   @media (max-width: 639px){
-    .wordmark{ top: 22px; }
+    .wordmark{
+      top: auto;
+      bottom: 22px;
+      cursor: pointer;
+      pointer-events: auto;
+    }
   }
 
   .bottom-fade{
@@ -94,7 +99,17 @@
     pointer-events: none;
   }
   @media (max-width: 639px){
-    .statement{ bottom: 22px; font-size: 13px; line-height: 16px; }
+    .statement{
+      bottom: 50px;
+      font-size: 13px; line-height: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease;
+    }
+    .statement.visible{
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 
   /* Hint that appears on first project */
@@ -528,6 +543,20 @@
     clearTimeout(v._t);
     v._t = setTimeout(persistActive, 200);
   }, { passive: true });
+  // Mobile: FOW tap toggles statement
+  const wordmark = document.querySelector('.wordmark');
+  const statement = document.querySelector('.statement');
+  wordmark.addEventListener('click', () => {
+    if (window.matchMedia('(max-width: 639px)').matches) {
+      statement.classList.toggle('visible');
+    }
+  });
+  // Tap anywhere else to dismiss
+  document.addEventListener('click', (e) => {
+    if (window.matchMedia('(max-width: 639px)').matches && !wordmark.contains(e.target)) {
+      statement.classList.remove('visible');
+    }
+  });
 })();
 </script>
 </body>
