@@ -514,6 +514,11 @@
     let paused = false;
     const speed = 0.8;
 
+    const enableAnim  = () => { rail.style.scrollSnapType = 'none'; };
+    const disableAnim = () => { rail.style.scrollSnapType = ''; };
+
+    enableAnim();
+
     const tick = () => {
       if (!paused) {
         rail.scrollLeft += speed;
@@ -525,17 +530,24 @@
     };
     rail._raf = requestAnimationFrame(tick);
 
-    const pause = () => {
-      paused = true;
-      clearTimeout(rail._resume);
-      rail._resume = setTimeout(() => { paused = false; }, 3000);
+    const attach = () => {
       ['pointerdown','touchstart','wheel'].forEach(ev =>
         rail.addEventListener(ev, pause, { passive: true, once: true })
       );
     };
-    ['pointerdown','touchstart','wheel'].forEach(ev =>
-      rail.addEventListener(ev, pause, { passive: true, once: true })
-    );
+
+    const pause = () => {
+      paused = true;
+      disableAnim();
+      clearTimeout(rail._resume);
+      rail._resume = setTimeout(() => {
+        enableAnim();
+        paused = false;
+        attach();
+      }, 3000);
+    };
+
+    attach();
   }
 
   function setActive(i){
