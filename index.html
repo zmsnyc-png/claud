@@ -91,27 +91,82 @@
     background: linear-gradient(to top, var(--bg) 0%, var(--bg) 55%, rgba(249,249,249,0) 100%);
     z-index: 40; pointer-events: none;
   }
-  .statement{
+  .bottom-content{
     position: fixed;
-    left: var(--side-pad); right: var(--side-pad); bottom: 44px;
+    left: 0; right: 0; bottom: 0;
     z-index: 50;
+    padding: 180px var(--side-pad) 44px;
+    background: linear-gradient(to bottom, transparent 0%, var(--bg) 180px);
+    pointer-events: none;
+  }
+  .bottom-content > *{ pointer-events: auto; }
+  .statement{
     font-size: 14px; line-height: 17px;
     color: var(--ink);
     text-wrap: pretty;
-    pointer-events: none;
+  }
+  .services-text{
+    display: none;
+    columns: 2;
+    column-gap: 60px;
+    font-size: 14px; line-height: 17px;
+    color: var(--ink);
+  }
+  .services-text.open{ display: block; }
+  .services-text ul{ list-style: none; }
+  .services-text li{ line-height: 17px; }
+  .bottom-actions{
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-top: 10px;
+  }
+  .services-toggle,
+  .contact-toggle{
+    background: none; border: none; padding: 0;
+    font-family: inherit;
+    font-size: 14px; line-height: 17px;
+    color: rgba(0,0,0,.4);
+    cursor: pointer;
+    letter-spacing: 0.005em;
+    flex-shrink: 0;
+  }
+  .contact-email{
+    font-size: 14px; line-height: 17px;
+    color: var(--ink);
+    letter-spacing: 0.005em;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 0;
+    opacity: 0;
+    display: inline-block;
+    transition: max-width .35s ease, opacity .25s ease;
+  }
+  .contact-email.open{
+    max-width: 220px;
+    opacity: 1;
+  }
+  .contact-email.copied{
+    color: rgba(0,0,0,.4);
   }
   @media (max-width: 639px){
-    .statement{
-      bottom: 50px;
-      font-size: 13px; line-height: 16px;
+    .services-toggle, .contact-toggle{ font-size: 13px; line-height: 16px; }
+    .contact-email{ font-size: 13px; line-height: 16px; }
+  }
+  @media (max-width: 639px){
+    .bottom-content{
+      padding-bottom: 22px;
       opacity: 0;
       pointer-events: none;
       transition: opacity .3s ease;
     }
-    .statement.visible{
+    .bottom-content.visible{
       opacity: 1;
       pointer-events: auto;
     }
+    .statement{ font-size: 13px; line-height: 16px; }
+    .services-text{ font-size: 13px; line-height: 16px; column-gap: 30px; }
   }
 
   /* Hint that appears on first project */
@@ -350,46 +405,6 @@
   /* Hide pinned stuff during print */
   @media print { .top-fade,.bottom-fade,.hint { display:none; } }
 
-  /* ======== Services section ======== */
-  .services-wrap{
-    position: absolute;
-    left: var(--side-pad); right: var(--side-pad);
-    top: var(--top-reserve); bottom: var(--bot-reserve);
-    display: flex;
-    flex-direction: column;
-    padding: 30px 0;
-  }
-  .services-heading{
-    font-size: 14px; line-height: 17px;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    text-transform: uppercase;
-    margin-bottom: 36px;
-  }
-  .services-cols{
-    display: flex;
-    gap: 80px;
-  }
-  .services-col{
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 11px;
-  }
-  .services-col li{
-    font-size: 14px; line-height: 17px;
-    letter-spacing: 0.01em;
-    color: var(--ink);
-  }
-  .services-col li::before{
-    content: "— ";
-    color: rgba(0,0,0,.3);
-    font-size: 12px;
-  }
-  @media (max-width: 639px){
-    .services-cols{ gap: 40px; }
-    .services-col li{ font-size: 13px; line-height: 16px; }
-  }
 
   .shot img {
     position: absolute; inset: 0;
@@ -448,42 +463,40 @@
       </div>
     </section>
 
-    <!-- ============ SERVICES ============ -->
-    <section class="project" data-screen-label="Services" data-index="2">
-      <div class="services-wrap">
-        <div class="services-heading">Services</div>
-        <div class="services-cols">
-          <ul class="services-col">
-            <li>Products catalog</li>
-            <li>Brochure</li>
-            <li>Publications guidelines</li>
-            <li>Collection identity</li>
-            <li>Digital production</li>
-            <li>Art direction</li>
-            <li>Type design</li>
-            <li>Visual campaigns</li>
-            <li>Stationary</li>
-            <li>Packaging</li>
-            <li>Motion design</li>
-          </ul>
-          <ul class="services-col">
-            <li>Wireframing</li>
-            <li>(UI)(UX)</li>
-            <li>Web design</li>
-            <li>E-commerce</li>
-            <li>Front &amp; Back End</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
   </main>
 
   <!-- Pinned bottom -->
   <div class="bottom-fade" aria-hidden="true"></div>
-  <p class="statement" data-screen-label="Statement (pinned)">
-    FOW is a design and identity practice founded on the belief that the clearest expression is the hardest to achieve. Working across brand identity, visual systems, and digital presence, the office partners with organizations that understand the difference between looking good and meaning something. No decoration for its own sake. No concept without consequence.
-  </p>
+  <div class="bottom-content" id="bottomContent">
+    <p class="statement" id="statement">
+      FOW is a design and identity practice founded on the belief that the clearest expression is the hardest to achieve. Working across brand identity, visual systems, and digital presence, the office partners with organizations that understand the difference between looking good and meaning something. No decoration for its own sake. No concept without consequence.
+    </p>
+    <div class="services-text" id="servicesText">
+      <ul>
+        <li>Products catalog</li>
+        <li>Brochure</li>
+        <li>Publications guidelines</li>
+        <li>Collection identity</li>
+        <li>Digital production</li>
+        <li>Art direction</li>
+        <li>Type design</li>
+        <li>Visual campaigns</li>
+        <li>Stationary</li>
+        <li>Packaging</li>
+        <li>Motion design</li>
+        <li>Wireframing</li>
+        <li>(UI)(UX)</li>
+        <li>Web design</li>
+        <li>E-commerce</li>
+        <li>Front &amp; Back End</li>
+      </ul>
+    </div>
+    <div class="bottom-actions">
+      <button class="services-toggle" id="servicesToggle" aria-label="Toggle services">+</button>
+      <button class="contact-toggle" id="contactToggle" aria-label="Contact">?</button>
+      <span class="contact-email" id="contactEmail">info@fieldof.work</span>
+    </div>
+  </div>
 
 <script>
 (() => {
@@ -492,10 +505,42 @@
   const hint = document.getElementById('hint');
 
   let activeIndex = 0;
+
+  function animateRail(rail) {
+    if (!rail || rail._interacted) return;
+    if (rail._stopAnim) rail._stopAnim();
+
+    let running = true;
+    const speed = 1.2; // px per frame (~72px/s at 60fps)
+
+    const tick = () => {
+      if (!running) return;
+      rail.scrollLeft += speed;
+      if (rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - 1) {
+        rail.scrollLeft = 0;
+      }
+      requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+    rail._stopAnim = () => { running = false; };
+
+    const stop = () => { rail._stopAnim(); rail._interacted = true; };
+    ['pointerdown','touchstart','wheel'].forEach(ev =>
+      rail.addEventListener(ev, stop, { once: true, passive: true })
+    );
+  }
+
   function setActive(i){
     if (i === activeIndex) return;
+    const oldRail = projects[activeIndex] && projects[activeIndex].querySelector('[data-rail]');
+    if (oldRail && oldRail._stopAnim) oldRail._stopAnim();
     activeIndex = i;
+    animateRail(projects[i] && projects[i].querySelector('[data-rail]'));
   }
+
+  // Start animation on first project after a short delay
+  setTimeout(() => animateRail(projects[0] && projects[0].querySelector('[data-rail]')), 600);
 
   // Observe which project is in view
   const io = new IntersectionObserver((entries) => {
@@ -619,21 +664,55 @@
     clearTimeout(v._t);
     v._t = setTimeout(persistActive, 200);
   }, { passive: true });
-  // Mobile: FOW tap toggles statement
+  // Mobile: FOW tap toggles bottom content
   const wordmark = document.querySelector('.wordmark');
-  const statement = document.querySelector('.statement');
+  const bottomContent = document.getElementById('bottomContent');
+  const statement = document.getElementById('statement');
+  const servicesText = document.getElementById('servicesText');
+  const servicesToggle = document.getElementById('servicesToggle');
+
   wordmark.addEventListener('click', () => {
     if (window.matchMedia('(max-width: 639px)').matches) {
-      const open = statement.classList.toggle('visible');
+      const open = bottomContent.classList.toggle('visible');
       document.body.classList.toggle('statement-open', open);
     }
   });
-  // Tap anywhere else to dismiss
+  // Tap anywhere else to dismiss (mobile)
   document.addEventListener('click', (e) => {
-    if (window.matchMedia('(max-width: 639px)').matches && !wordmark.contains(e.target)) {
-      statement.classList.remove('visible');
+    if (window.matchMedia('(max-width: 639px)').matches
+        && !wordmark.contains(e.target)
+        && !bottomContent.contains(e.target)) {
+      bottomContent.classList.remove('visible');
       document.body.classList.remove('statement-open');
     }
+  });
+
+  // + toggle: swap statement ↔ services
+  servicesToggle.addEventListener('click', () => {
+    const open = servicesText.classList.toggle('open');
+    statement.style.display = open ? 'none' : '';
+    servicesToggle.textContent = open ? '−' : '+';
+  });
+
+  // ? toggle: slide email in/out
+  const contactToggle = document.getElementById('contactToggle');
+  const contactEmail = document.getElementById('contactEmail');
+  contactToggle.addEventListener('click', () => {
+    const open = contactEmail.classList.toggle('open');
+    contactToggle.textContent = open ? '×' : '?';
+  });
+
+  // Email: copy to clipboard on click
+  contactEmail.addEventListener('click', () => {
+    navigator.clipboard.writeText('info@fieldof.work').then(() => {
+      const original = contactEmail.textContent;
+      contactEmail.textContent = 'copied';
+      contactEmail.classList.add('copied');
+      setTimeout(() => {
+        contactEmail.textContent = original;
+        contactEmail.classList.remove('copied');
+      }, 1500);
+    });
   });
 })();
 </script>
