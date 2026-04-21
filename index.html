@@ -511,7 +511,7 @@
     if (rail._stopAnim) rail._stopAnim();
 
     let running = true;
-    const speed = 1.2; // px per frame (~72px/s at 60fps)
+    const speed = 1.5; // px per frame (~90px/s at 60fps)
 
     const tick = () => {
       if (!running) return;
@@ -645,17 +645,6 @@
       v.scrollTo({ top: projects[saved].offsetTop, behavior: 'auto' });
     });
   }
-  const savedRails = JSON.parse(localStorage.getItem('fow:rails') || '{}');
-  projects.forEach((p, i) => {
-    const rail = p.querySelector('[data-rail]');
-    if (rail && savedRails[i] != null) {
-      requestAnimationFrame(() => { rail.scrollLeft = savedRails[i]; });
-    }
-    rail && rail.addEventListener('scroll', () => {
-      savedRails[i] = rail.scrollLeft;
-      localStorage.setItem('fow:rails', JSON.stringify(savedRails));
-    }, { passive: true });
-  });
 
   // Save active project
   const persistActive = () => localStorage.setItem(KEY, String(activeIndex));
