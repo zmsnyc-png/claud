@@ -514,8 +514,8 @@
     let paused = false;
     const speed = 0.8;
 
-    const enableAnim  = () => { rail.style.scrollSnapType = 'none'; };
-    const disableAnim = () => { rail.style.scrollSnapType = ''; };
+    const enableAnim  = () => { rail.style.scrollSnapType = 'none'; rail._animating = true; };
+    const disableAnim = () => { rail.style.scrollSnapType = ''; rail._animating = false; };
 
     enableAnim();
 
@@ -530,24 +530,39 @@
     };
     rail._raf = requestAnimationFrame(tick);
 
-    const attach = () => {
+    const attachTouch = () => {
       ['pointerdown','touchstart'].forEach(ev =>
-        rail.addEventListener(ev, pause, { passive: true, once: true })
+        rail.addEventListener(ev, pauseTouch, { passive: true, once: true })
       );
     };
 
-    const pause = () => {
+    const pauseTouch = () => {
       paused = true;
       disableAnim();
       clearTimeout(rail._resume);
       rail._resume = setTimeout(() => {
-        enableAnim();
-        paused = false;
-        attach();
+        if (!rail._hovered) { enableAnim(); paused = false; attachTouch(); }
       }, 3000);
     };
 
-    attach();
+    // Mouse hover: pause immediately, resume on leave
+    if (!rail._hoverBound) {
+      rail._hoverBound = true;
+      rail.addEventListener('mouseenter', () => {
+        rail._hovered = true;
+        paused = true;
+        disableAnim();
+        clearTimeout(rail._resume);
+      });
+      rail.addEventListener('mouseleave', () => {
+        rail._hovered = false;
+        enableAnim();
+        paused = false;
+        attachTouch();
+      });
+    }
+
+    attachTouch();
   }
 
   function setActive(i){
@@ -610,7 +625,7 @@
 
       // If vertical wheel, we may want to redirect into horizontal scrolling
       // Skip redirect when animation is running — let vertical scroll through
-      if (verticallyDominant && !rail._raf) {
+      if (verticallyDominant && !rail._animating) {
         const goingDown = ev.deltaY > 0;
         const atEnd   = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - EDGE_EPS;
         const atStart = rail.scrollLeft <= EDGE_EPS;
