@@ -609,7 +609,8 @@
       const verticallyDominant = absY > absX;
 
       // If vertical wheel, we may want to redirect into horizontal scrolling
-      if (verticallyDominant) {
+      // Skip redirect when animation is running — let vertical scroll through
+      if (verticallyDominant && !rail._raf) {
         const goingDown = ev.deltaY > 0;
         const atEnd   = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - EDGE_EPS;
         const atStart = rail.scrollLeft <= EDGE_EPS;
