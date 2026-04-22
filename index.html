@@ -421,7 +421,7 @@
     background: #000;
     z-index: 200;
     display: flex; align-items: center; justify-content: center;
-    transition: opacity 0.7s ease;
+    transition: opacity 0.6s ease;
     cursor: pointer;
   }
   .intro-overlay.exit { opacity: 0; pointer-events: none; }
@@ -432,14 +432,16 @@
     letter-spacing: 0.04em;
     color: #fff;
     white-space: nowrap;
-    animation: fowZoom 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-  .intro-wm .wm-of { margin: 0 10px 0 44px; }
-  @keyframes fowZoom {
-    0%   { transform: scale(1);   opacity: 0; }
-    10%  { transform: scale(1);   opacity: 1; }
-    80%  { transform: scale(5.5); opacity: 1; }
-    100% { transform: scale(7);   opacity: 0; }
+  .intro-wm::after {
+    content: '|';
+    margin-left: 2px;
+    animation: blink 0.6s step-end infinite;
+  }
+  .intro-wm.done::after { content: none; }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
   }
 </style>
 </head>
@@ -447,7 +449,7 @@
 
   <!-- Intro overlay -->
   <div class="intro-overlay" id="introOverlay">
-    <div class="intro-wm">FIELD<span class="wm-of">OF</span>WORK</div>
+    <div class="intro-wm"></div>
   </div>
 
   <!-- Pinned chrome -->
@@ -795,19 +797,31 @@
       confirm();
     }
   });
-  // Intro animation — plays once, skip on return visits, tap to dismiss
+  // Intro animation — typewriter, plays once, tap to skip
   const introOverlay = document.getElementById('introOverlay');
   if (introOverlay) {
     const dismiss = () => {
       introOverlay.classList.add('exit');
-      setTimeout(() => introOverlay.remove(), 750);
+      setTimeout(() => introOverlay.remove(), 650);
     };
     if (localStorage.getItem('fow:intro')) {
       introOverlay.remove();
     } else {
       localStorage.setItem('fow:intro', '1');
+      const wmEl = introOverlay.querySelector('.intro-wm');
+      const full = 'FIELD OF WORK';
+      let i = 0;
+      const type = () => {
+        if (i < full.length) {
+          wmEl.textContent = full.slice(0, ++i);
+          setTimeout(type, 85);
+        } else {
+          wmEl.classList.add('done');
+          setTimeout(dismiss, 600);
+        }
+      };
       introOverlay.addEventListener('click', dismiss);
-      setTimeout(dismiss, 2400);
+      setTimeout(type, 300);
     }
   }
 })();
