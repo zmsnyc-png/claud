@@ -504,6 +504,9 @@
   const projects = [...document.querySelectorAll('.project')];
   const hint = document.getElementById('hint');
 
+  // Auto-index: works for any number of projects, no manual data-index needed
+  projects.forEach((p, i) => { p.dataset.index = i; });
+
   let activeIndex = 0;
 
   function startSlideshow(rail) {
@@ -575,8 +578,8 @@
     startSlideshow(projects[i]?.querySelector('[data-rail]'));
   }
 
-  // Auto-start on first project
-  setTimeout(() => startSlideshow(projects[0]?.querySelector('[data-rail]')), 800);
+  // Auto-start slideshow on whichever project is active on load
+  setTimeout(() => startSlideshow(projects[activeIndex]?.querySelector('[data-rail]')), 800);
 
   // Observe which project is in view
   const io = new IntersectionObserver((entries) => {
