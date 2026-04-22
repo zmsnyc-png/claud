@@ -157,7 +157,14 @@
     .contact-email{ font-size: 13px; line-height: 16px; }
   }
   @media (max-width: 639px){
-    .bottom-content{ padding-bottom: 22px; }
+    .bottom-content{
+      padding: 0 var(--side-pad) 22px;
+      background: none;
+    }
+    .bottom-content.services-open{
+      padding: 180px var(--side-pad) 22px;
+      background: linear-gradient(to bottom, transparent 0%, var(--bg) 180px);
+    }
     .statement{
       font-size: 13px; line-height: 16px;
       opacity: 0;
@@ -722,6 +729,7 @@
   servicesToggle.addEventListener('click', () => {
     const open = servicesText.classList.toggle('open');
     statement.style.display = open ? 'none' : '';
+    bottomContent.classList.toggle('services-open', open);
     servicesToggle.textContent = open ? '−' : '+';
   });
 
