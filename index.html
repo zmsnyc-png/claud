@@ -157,17 +157,17 @@
     .contact-email{ font-size: 13px; line-height: 16px; }
   }
   @media (max-width: 639px){
-    .bottom-content{
-      padding-bottom: 22px;
+    .bottom-content{ padding-bottom: 22px; }
+    .statement{
+      font-size: 13px; line-height: 16px;
       opacity: 0;
       pointer-events: none;
       transition: opacity .3s ease;
     }
-    .bottom-content.visible{
+    .statement.visible{
       opacity: 1;
       pointer-events: auto;
     }
-    .statement{ font-size: 13px; line-height: 16px; }
     .services-text{ font-size: 13px; line-height: 16px; column-gap: 30px; }
   }
 
@@ -704,7 +704,7 @@
 
   wordmark.addEventListener('click', () => {
     if (window.matchMedia('(max-width: 639px)').matches) {
-      const open = bottomContent.classList.toggle('visible');
+      const open = statement.classList.toggle('visible');
       document.body.classList.toggle('statement-open', open);
     }
   });
@@ -713,7 +713,7 @@
     if (window.matchMedia('(max-width: 639px)').matches
         && !wordmark.contains(e.target)
         && !bottomContent.contains(e.target)) {
-      bottomContent.classList.remove('visible');
+      statement.classList.remove('visible');
       document.body.classList.remove('statement-open');
     }
   });
