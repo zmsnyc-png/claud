@@ -36,7 +36,6 @@
       --bot-reserve: 50px;
       --copy-w: 100%;
       --copy-gap: 0px;
-      --img-h: calc(100dvh - var(--top-reserve) - 50px - var(--bot-reserve) - 20px);
     }
     body.statement-open {
       --bot-reserve: 180px;
@@ -122,6 +121,7 @@
     align-items: baseline;
     gap: 14px;
     margin-top: 10px;
+    justify-content: flex-end;
   }
   .services-toggle,
   .contact-toggle{
@@ -234,24 +234,19 @@
   }
   @media (max-width: 639px){
     .proj-copy{
-      /* Stack above the rail on mobile */
-      position: absolute;
-      top: var(--top-reserve);
-      left: var(--side-pad);
-      right: var(--side-pad);
-      bottom: auto;
+      position: relative;
+      top: auto; left: auto; right: auto; bottom: auto;
       width: auto;
-      padding: 8px 0 20px 0;
+      padding: 10px var(--side-pad) 12px;
+      flex-shrink: 0;
       display: block;
-      background: linear-gradient(to bottom, var(--bg) 60%, transparent 100%);
     }
     .proj-copy .top + .proj-quote,
     .proj-copy > .proj-quote{
-      margin-top: 14px;
+      margin-top: 10px;
       max-width: none;
-      /* clamp quote so it doesn't balloon */
       display: -webkit-box;
-      -webkit-line-clamp: 5;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
@@ -298,17 +293,16 @@
 
   @media (max-width: 639px){
     .h-rail{
-      left: 0;
-      right: 0;
-      top: calc(var(--top-reserve) + 50px);
-      bottom: var(--bot-reserve);
+      position: relative;
+      left: auto; right: auto; top: auto; bottom: auto;
+      flex: 1;
+      min-height: 0;
       height: auto;
-      padding: 10px var(--side-pad);
+      padding: 0 var(--side-pad) 10px;
       gap: 14px;
-      transition: top .35s ease, bottom .35s ease;
     }
     .shot{
-      transition: height .35s ease;
+      height: 100%;
     }
   }
 
@@ -501,9 +495,9 @@
       </ul>
     </div>
     <div class="bottom-actions">
-      <button class="services-toggle" id="servicesToggle" aria-label="Toggle services">+</button>
-      <button class="contact-toggle" id="contactToggle" aria-label="Contact">?</button>
       <span class="contact-email" id="contactEmail">info@fieldof.work</span>
+      <button class="contact-toggle" id="contactToggle" aria-label="Contact">?</button>
+      <button class="services-toggle" id="servicesToggle" aria-label="Toggle services">+</button>
     </div>
   </div>
 
