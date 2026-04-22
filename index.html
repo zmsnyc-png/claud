@@ -733,7 +733,8 @@
 
   // Email: copy to clipboard on click
   contactEmail.addEventListener('click', () => {
-    navigator.clipboard.writeText('info@fieldof.work').then(() => {
+    const email = 'info@fieldof.work';
+    const confirm = () => {
       const original = contactEmail.textContent;
       contactEmail.textContent = 'copied';
       contactEmail.classList.add('copied');
@@ -741,7 +742,22 @@
         contactEmail.textContent = original;
         contactEmail.classList.remove('copied');
       }, 1500);
-    });
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(email).then(confirm).catch(() => fallback());
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement('textarea');
+      ta.value = email;
+      ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      confirm();
+    }
   });
 })();
 </script>
